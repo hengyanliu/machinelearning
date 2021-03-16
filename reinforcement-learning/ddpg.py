@@ -43,7 +43,7 @@ ENV_NAME = 'Pendulum-v0'
 
 class DDPG(object):
     def __init__(self, a_dim, s_dim, a_bound,):
-        self.memory = np.zeros((MEMORY_CAPACITY, s_dim * 2 + a_dim + 1), dtype=np.float32)
+        self.memory = np.zeros((MEMORY_CAPACITY, s_dim * 2 + a_dim + 1), dtype=np.float32) # hl？
         self.pointer = 0
         self.sess = tf.Session()
 
@@ -53,8 +53,8 @@ class DDPG(object):
         self.R = tf.placeholder(tf.float32, [None, 1], 'r')
 
         with tf.variable_scope('Actor'):
-            self.a = self._build_a(self.S, scope='eval', trainable=True)
-            a_ = self._build_a(self.S_, scope='target', trainable=False)
+            self.a = self._build_a(self.S, scope='eval', trainable=True) #hl a is computed by eval net
+            a_ = self._build_a(self.S_, scope='target', trainable=False) #hl a_ next action is choosed by target-Net
         with tf.variable_scope('Critic'):
             # assign self.a = a in memory when calculating q for td_error,
             # otherwise the self.a is from Actor when updating Actor
@@ -142,10 +142,10 @@ for episode in range(MAX_EPISODES):
 
         # Add exploration noise
         a = ddpg.choose_action(s)
-        a = np.clip(np.random.normal(a, var), -2, 2)    # add randomness to action selection for exploration
-        s_, r, done, info = env.step(a)
+        a = np.clip(np.random.normal(a, var), -2, 2)    # add randomness to action selection for exploration 
+        s_, r, done, info = env.step(a) #hl put action to environment get next state s_ , reward r
 
-        ddpg.store_transition(s, a, r / 10, s_)
+        ddpg.store_transition(s, a, r / 10, s_)  #hlq r/10 ?
 
         if ddpg.pointer > MEMORY_CAPACITY:
             var *= .9995    # decay the action randomness
